@@ -1,0 +1,101 @@
+name: based_code
+
+services:
+  app: &laravel-app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: app
+    working_dir: /var/www/html/backend
+    volumes:
+      - ../app:/var/www/html/backend/app
+      - ../routes:/var/www/html/backend/routes
+      - ../config:/var/www/html/backend/config
+      - ../database:/var/www/html/backend/database
+      - ../resources:/var/www/html/backend/resources
+      - ../storage:/var/www/html/backend/storage
+      - ../bootstrap/app.php:/var/www/html/backend/bootstrap/app.php
+      - ../bootstrap/providers.php:/var/www/html/backend/bootstrap/providers.php
+      - ../artisan:/var/www/html/backend/artisan:ro
+      - ../.env:/var/www/html/backend/.env:ro
+    env_file:
+      - ../.env
+    environment:
+      DB_CONNECTION: "${DOCKER_DB_CONNECTION:?DOCKER_DB_CONNECTION must be set in project-root .env}"
+      DB_HOST: "${DOCKER_DB_HOST:?DOCKER_DB_HOST must be set in project-root .env}"
+      DB_PORT: "${DOCKER_DB_PORT:?DOCKER_DB_PORT must be set in project-root .env}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - laravel
+    command: php-fpm
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: web
+    ports:
+      - "${APP_HTTP_PORT:?APP_HTTP_PORT must be set in project-root .env}:80"
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - laravel
+
+  queue:
+    <<: *laravel-app
+    command: php artisan queue:work --sleep=3 --tries=3
+
+  scheduler:
+    <<: *laravel-app
+    command: php artisan schedule:work
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PUBLISHED_PORT:?MYSQL_PUBLISHED_PORT must be set in project-root .env}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be set in project-root .env}"
+      MYSQL_DATABASE: "${DB_DATABASE:?DB_DATABASE must be set in project-root .env}"
+      MYSQL_USER: "${DB_USERNAME:?DB_USERNAME must be set in project-root .env}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD must be set in project-root .env}"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping --host=127.0.0.1 --user=root --password="$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - laravel
+
+  redis:
+    image: redis:7-alpine
+    container_name: based_code-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+    - redis_data:/data
+    healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+    networks:
+    - laravel
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  laravel:
+    driver: bridge
