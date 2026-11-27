@@ -37,6 +37,38 @@ abstract class Controller
     }
 
     // --------------------
+    // GENERIC CREATE PAGE
+    // --------------------
+    public function createPage()
+    {
+        $model = $this->service->getModelInstance();
+
+        $this->authorize('create', $model::class);
+
+        return view($this->getBladePath());
+    }
+
+    // --------------------
+    // GENERIC EDIT PAGE
+    // --------------------
+    public function editPage($id = null)
+    {
+        $id = $id ?? request()->route('id');
+
+        abort_if($id === null, 404);
+
+        $model = $this->fetchResource($id);
+
+        abort_if(!$model, 404);
+
+        $this->authorize('update', $model);
+
+        return view($this->getBladePath(), [
+            'data' => $model,
+        ]);
+    }
+
+    // --------------------
     // INDEX
     // --------------------
     public function index()

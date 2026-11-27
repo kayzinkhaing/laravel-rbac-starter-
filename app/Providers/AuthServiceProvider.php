@@ -4,12 +4,16 @@ namespace App\Providers;
 
 use App\Models\ClientProfile;
 use App\Models\CommonTable;
+use App\Models\MasterDataCategory;
+use App\Models\MasterDataItem;
 use App\Models\Organization;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Policies\ClientProfilePolicy;
 use App\Policies\CommonTablePolicy;
+use App\Policies\MasterDataCategoryPolicy;
+use App\Policies\MasterDataItemPolicy;
 use App\Policies\OrganizationPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
@@ -27,6 +31,8 @@ class AuthServiceProvider extends ServiceProvider
         Organization::class => OrganizationPolicy::class,
         ClientProfile::class => ClientProfilePolicy::class,
         CommonTable::class => CommonTablePolicy::class,
+        MasterDataCategory::class => MasterDataCategoryPolicy::class,
+        MasterDataItem::class => MasterDataItemPolicy::class,
     ];
 
     public function boot(): void

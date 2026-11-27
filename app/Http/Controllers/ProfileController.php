@@ -6,6 +6,10 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
 use App\Models\Address;
 use App\Models\Country;
+use App\Models\Ward;
+use App\Models\District;
+use App\Models\State;
+use App\Models\Township;
 use App\Support\AdminDashboardAccess;
 use App\Traits\HasMedia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -43,17 +47,36 @@ class ProfileController extends Controller
             ->latest()
             ->get();
 
+        $editingAddressId = $request->query('edit_address');
+
+        $address = $editingAddressId
+            ? $user->addresses()->findOrFail($editingAddressId)
+            : new Address();
+
+        $countryId = old('country_id', $address->country_id);
+        $stateId = old('state_id', $address->state_id);
+        $districtId = old('district_id', $address->district_id);
+        $townshipId = old('township_id', $address->township_id);
+
         return view('profile.edit', [
             'user' => $user,
             'addresses' => $addresses,
             'countries' => Country::query()->orderBy('name')->get(),
             'locationOptions' => [
-                'state_id' => collect(),
-                'district_id' => collect(),
-                'township_id' => collect(),
-                'ward_id' => collect(),
+                'state_id' => $countryId
+                    ? State::where('country_id', $countryId)->orderBy('name')->get()
+                    : collect(),
+                'district_id' => $stateId
+                    ? District::where('state_id', $stateId)->orderBy('name')->get()
+                    : collect(),
+                'township_id' => $districtId
+                    ? Township::where('district_id', $districtId)->orderBy('name')->get()
+                    : collect(),
+                'ward_id' => $townshipId
+                    ? Ward::where('township_id', $townshipId)->orderBy('name')->get()
+                    : collect(),
             ],
-            'address' => new Address(),
+            'address' => $address,
             'roleDashboard' => $request->routeIs('role.profile'),
         ]);
     }

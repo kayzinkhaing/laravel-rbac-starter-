@@ -11,7 +11,7 @@
     </div>
     <div>
         <label class="field-label" for="country_id">Country</label>
-        <select class="input-control" id="country_id" name="country_id" x-ref="country" @change="load('states', $event.target.value, 'state_id')">
+        <select class="input-control" id="country_id" name="country_id" required x-ref="country" @change="load('states', $event.target.value, 'state_id')">
             <option value="">Select country</option>
             @foreach ($countries as $country)
                 <option value="{{ $country->id }}" @selected(old('country_id', $address->country_id) == $country->id)>{{ $country->name }}</option>

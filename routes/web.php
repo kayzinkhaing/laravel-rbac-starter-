@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\MessageController;
+use App\Http\Controllers\Web\MasterDataCategoryController;
+use App\Http\Controllers\Web\MasterDataItemController;
 use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\PermissionController;
 use App\Http\Controllers\Web\RoleController;
@@ -96,6 +98,37 @@ Route::middleware(['auth', 'resolve.role.dashboard', 'share.active.role'])
                 Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
             });
     });
+
+
+// Dynamic Master Data CRUD.
+// Permission is assigned to roles through the existing RBAC system.
+// Keep these routes outside the {roleSlug} group because the generic
+// parent controller reads the first route parameter as the resource ID.
+Route::middleware(['auth', 'share.active.role', 'can:manage master data'])->group(function () {
+    Route::prefix('master-data-categories')
+        ->name('master-data-categories.')
+        ->group(function () {
+            Route::get('/create', [MasterDataCategoryController::class, 'createPage'])->name('create');
+            Route::get('/', [MasterDataCategoryController::class, 'index'])->name('index');
+            Route::get('/{id}', [MasterDataCategoryController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [MasterDataCategoryController::class, 'editPage'])->name('edit');
+            Route::post('/', [MasterDataCategoryController::class, 'store'])->name('store');
+            Route::put('/{id}', [MasterDataCategoryController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MasterDataCategoryController::class, 'destroy'])->name('destroy');
+        });
+
+    Route::prefix('master-data-items')
+        ->name('master-data-items.')
+        ->group(function () {
+            Route::get('/create', [MasterDataItemController::class, 'createPage'])->name('create');
+            Route::get('/', [MasterDataItemController::class, 'index'])->name('index');
+            Route::get('/{id}', [MasterDataItemController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [MasterDataItemController::class, 'editPage'])->name('edit');
+            Route::post('/', [MasterDataItemController::class, 'store'])->name('store');
+            Route::put('/{id}', [MasterDataItemController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MasterDataItemController::class, 'destroy'])->name('destroy');
+        });
+});
 
 Route::get('/profile/image/{user}', [ProfileController::class, 'image'])
     ->middleware('auth')

@@ -58,7 +58,7 @@
 
     {{-- Saved addresses --}}
     <section class="surface-card mb-6 p-5 sm:p-6"
-             x-data="{ addressFormOpen: {{ old('_address_form') ? 'true' : 'false' }} }">
+             x-data="{ addressFormOpen: {{ (old('_address_form') || request()->filled('edit_address')) ? 'true' : 'false' }} }">
 
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -83,11 +83,20 @@
                             {{ $savedAddress->building_name ?: 'Saved address' }}
                         </p>
 
-                        @if ($savedAddress->is_default)
-                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                                Default
-                            </span>
-                        @endif
+                        <div class="flex items-center gap-2">
+                            @if ($savedAddress->is_default)
+                                <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                                    Default
+                                </span>
+                            @endif
+
+                            <a href="{{ request()->fullUrlWithQuery([
+                                'edit_address' => $savedAddress->getKey()
+                            ]) }}#address-form"
+                               class="btn-secondary">
+                                Edit
+                            </a>
+                        </div>
                     </div>
 
                     <p class="mt-2 text-sm leading-6 text-slate-600">
@@ -122,17 +131,27 @@
             @endforelse
         </div>
 
-        {{-- Inline address creation form --}}
-        <div x-cloak x-show="addressFormOpen" x-transition class="mt-5">
+        {{-- Inline address creation / editing form --}}
+        <div id="address-form" x-cloak x-show="addressFormOpen" x-transition class="mt-5">
             <div class="mb-4">
-                <h3 class="text-sm font-semibold text-slate-900">Create your address</h3>
+                <h3 class="text-sm font-semibold text-slate-900">
+                    {{ $address->exists ? 'Edit your address' : 'Create your address' }}
+                </h3>
                 <p class="mt-1 text-sm text-slate-500">
                     Enter your address and select your Myanmar administrative locations.
                 </p>
             </div>
 
-            <form method="POST" action="{{ route('addresses.store') }}">
+            <form method="POST"
+                  action="{{ $address->exists
+                      ? route('addresses.update', $address)
+                      : route('addresses.store') }}">
                 @csrf
+
+                @if ($address->exists)
+                    @method('PUT')
+                @endif
+
                 <input type="hidden" name="_address_form" value="1">
 
                 @include('addresses._form', [
@@ -142,18 +161,17 @@
                 ])
 
                 <div class="mt-4 flex justify-end gap-3">
-                    <button type="button"
-                            class="btn-secondary"
-                            @click="addressFormOpen = false">
+                    <a href="{{ request()->url() }}" class="btn-secondary">
                         Cancel
-                    </button>
+                    </a>
 
                     <button type="submit" class="btn-primary">
-                        Save address
+                        {{ $address->exists ? 'Update address' : 'Save address' }}
                     </button>
                 </div>
             </form>
         </div>
+
     </section>
 
     <div class="space-y-5">

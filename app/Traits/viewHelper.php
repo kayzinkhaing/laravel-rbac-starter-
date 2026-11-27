@@ -28,14 +28,23 @@ trait viewHelper
 
     protected function indexRouteName(): string
     {
-        // backend.technologies.edit
         $routeName = request()->route()->getName();
 
-        // ['backend', 'technologies', 'edit']
-        $parts = explode('.', $routeName);
+        if (!$routeName) {
+            throw new \LogicException('The current route does not have a name.');
+        }
 
-        // backend.technologies.index
-        return "{$parts[0]}.{$parts[1]}.index";
+        // Replace the final action with the resource index route.
+        // Examples:
+        // backend.users.update          -> backend.users.index
+        // master-data-categories.store  -> master-data-categories.index
+        // master-data-items.destroy     -> master-data-items.index
+        return preg_replace('/\\.[^.]+$/', '.index', $routeName);
+    }
+
+    protected function getIndexRoute(): string
+    {
+        return $this->indexRouteName();
     }
 
     protected function indexRouteParams(): array

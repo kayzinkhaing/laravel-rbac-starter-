@@ -45,7 +45,7 @@ class LocalRbacSeeder extends Seeder
 
             $createdRoles[$name] = $role->wasRecentlyCreated;
 
-            if ($createdRoles[$name]) {
+            if ($createdRoles[$name] || $name === 'super-admin') {
                 foreach ($permissionNames as $permissionName) {
                     $role->givePermissionTo($permissions[$permissionName]);
                 }

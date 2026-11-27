@@ -64,6 +64,20 @@
             @endcan
         </nav>
 
+        @can('manage master data')
+            <p class="sidebar-label mt-8" :class="{ 'lg:hidden': sidebarCollapsed }">Master Data</p>
+            <nav class="space-y-1" aria-label="Master Data">
+                <a href="{{ route('master-data-categories.index') }}" @click="sidebarOpen = false" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('master-data-categories.*')]) :title="sidebarCollapsed ? 'Master Data Categories' : null">
+                    <x-icon name="folder-tree" class="h-[18px] w-[18px] shrink-0" />
+                    <span :class="{ 'lg:hidden': sidebarCollapsed }">Categories</span>
+                </a>
+                <a href="{{ route('master-data-items.index') }}" @click="sidebarOpen = false" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('master-data-items.*')]) :title="sidebarCollapsed ? 'Master Data Items' : null">
+                    <x-icon name="list" class="h-[18px] w-[18px] shrink-0" />
+                    <span :class="{ 'lg:hidden': sidebarCollapsed }">Items</span>
+                </a>
+            </nav>
+        @endcan
+
         <p class="sidebar-label mt-8" :class="{ 'lg:hidden': sidebarCollapsed }">Account</p>
         <nav class="space-y-1" aria-label="Account">
             <a href="{{ \App\Support\AdminDashboardAccess::profileUrlFor(auth()->user()) }}" @click="sidebarOpen = false" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('profile.*', 'role.profile*')]) :title="sidebarCollapsed ? 'My profile' : null">
