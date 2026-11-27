@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Contracts\BaseInterface;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{ BelongsTo, BelongsToMany, MorphToMany };
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, MorphToMany};
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +25,15 @@ abstract class Common
 
     public function allByRole(?string $role = null)
     {
-        $role ??= Auth::user()?->getRoleNames()->first()
-            ?? 'guest';
+        if ($role === null) {
+            $user = Auth::user();
+
+            $role = $user instanceof \App\Models\User
+                ? $user->getRoleNames()->first()
+                : null;
+
+            $role ??= 'guest';
+        }
 
         return $this->repository->allByRole($role);
     }

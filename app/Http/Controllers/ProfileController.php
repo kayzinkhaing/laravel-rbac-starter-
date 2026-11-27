@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
+use App\Models\Address;
+use App\Models\Country;
 use App\Support\AdminDashboardAccess;
 use App\Traits\HasMedia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -32,10 +34,26 @@ class ProfileController extends Controller
             return $redirect;
         }
 
-        $request->user()->loadMissing(['roles', 'media']);
+        $user = $request->user();
+
+        $user->loadMissing(['roles', 'media']);
+
+        $addresses = $user->addresses()
+            ->with(['country', 'state', 'district', 'township', 'ward'])
+            ->latest()
+            ->get();
 
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'addresses' => $addresses,
+            'countries' => Country::query()->orderBy('name')->get(),
+            'locationOptions' => [
+                'state_id' => collect(),
+                'district_id' => collect(),
+                'township_id' => collect(),
+                'ward_id' => collect(),
+            ],
+            'address' => new Address(),
             'roleDashboard' => $request->routeIs('role.profile'),
         ]);
     }

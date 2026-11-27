@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\TwoFactorController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\WebRegistrationOtpController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Routes that only guests (not logged-in users) can access
 */
+
 Route::middleware('guest')->group(function () {
 
     // 🔑 Register / Login
@@ -41,6 +43,21 @@ Route::middleware('guest')->group(function () {
 
     Route::get('auth/github', [OAuthController::class, 'redirectToGithub'])->name('github');
     Route::get('auth/github/callback', [OAuthController::class, 'handleGithubCallback'])->name('github.callback');
+
+    Route::get('register/verify-otp', [
+        WebRegistrationOtpController::class,
+        'show',
+    ])->name('register.otp');
+
+    Route::post('register/verify-otp', [
+        WebRegistrationOtpController::class,
+        'verify',
+    ])->middleware('throttle:6,1')->name('register.otp.verify');
+
+    Route::post('register/resend-otp', [
+        WebRegistrationOtpController::class,
+        'resend',
+    ])->middleware('throttle:3,1')->name('register.otp.resend');
 });
 
 /*
@@ -71,7 +88,6 @@ Route::middleware('auth')->group(function () {
 
     // 🔓 Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
 });
 
 Route::middleware('guest')->group(function () {

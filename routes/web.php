@@ -11,6 +11,8 @@ use App\Http\Controllers\Web\UserController;
 use App\Support\AdminDashboardAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\AddressController;
+use App\Http\Controllers\Web\AddressLocationController;
 
 Route::view('/', 'home')->name('home');
 
@@ -146,6 +148,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/payment/process', [PaymentController::class, 'processPayment'])->name('payment.process');
     Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
     Route::get('/payment/cancel', [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::resource('addresses', AddressController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    Route::prefix('address-locations')->name('address-locations.')->group(function () {
+        Route::get('/countries/{country}/states', [AddressLocationController::class, 'states'])
+            ->name('states');
+
+        Route::get('/states/{state}/districts', [AddressLocationController::class, 'districts'])
+            ->name('districts');
+
+        Route::get('/districts/{district}/townships', [AddressLocationController::class, 'townships'])
+            ->name('townships');
+
+        Route::get('/townships/{township}/wards', [AddressLocationController::class, 'wards'])
+            ->name('wards');
+    });
 });
 
 require __DIR__.'/auth.php';
