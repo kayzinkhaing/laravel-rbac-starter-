@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use App\Contracts\UserInterface;
 use App\Events\UserRegistered;
 use Illuminate\Http\UploadedFile;
@@ -21,6 +23,146 @@ class RegistrationService extends Common
 
         $this->userRepository = $userRepository;
     }
+
+
+    /**
+     * Store pending WEB registration in Redis.
+     * The account is not created until OTP verification succeeds.
+     */
+    public function storeWebPendingRegistration(array $data): void
+    {
+        $email = strtolower(trim($data['email']));
+
+        $otp = $this->generateCode();
+
+        $pending = [
+            'name' => $data['name'],
+            'email' => $email,
+            'password' => Hash::make($data['password']),
+            'otp_hash' => Hash::make($otp),
+        ];
+
+        Redis::setex(
+            "register:web:{$email}",
+            $this->verificationExpiry * 60,
+            json_encode($pending)
+        );
+
+        Redis::del("register:web:attempts:{$email}");
+        Redis::del("register:web:resend:{$email}");
+
+        event(new \App\Events\UserRegistered($email, $otp));
+    }
+
+    /**
+     * Verify WEB registration OTP and create the verified account.
+     */
+    public function verifyWebCode(string $email, string $code): ?User
+    {
+        $email = strtolower(trim($email));
+
+        $key = "register:web:{$email}";
+        $attemptKey = "register:web:attempts:{$email}";
+
+        $stored = Redis::get($key);
+
+        if (! $stored) {
+            return null;
+        }
+
+        $attempts = Redis::incr($attemptKey);
+
+        if ($attempts === 1) {
+            Redis::expire($attemptKey, $this->verificationExpiry * 60);
+        }
+
+        if ($attempts > 5) {
+            Redis::del($key);
+            Redis::del($attemptKey);
+
+            return null;
+        }
+
+        $data = json_decode($stored, true);
+
+        if (
+            ! $data ||
+            empty($data['otp_hash']) ||
+            ! Hash::check($code, $data['otp_hash'])
+        ) {
+            return null;
+        }
+
+        // Prevent duplicate account creation if another registration
+        // claimed the email while this OTP was pending.
+        if (User::where('email', $email)->exists()) {
+            Redis::del($key);
+            Redis::del($attemptKey);
+
+            return null;
+        }
+
+        // Create the account only after successful OTP verification.
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $email,
+            'password' => $data['password'],
+        ]);
+
+        // email_verified_at is deliberately set after OTP verification.
+        $user->forceFill([
+            'email_verified_at' => now(),
+        ])->save();
+
+        Redis::del($key);
+        Redis::del($attemptKey);
+
+        return $user;
+    }
+
+    /**
+     * Resend WEB registration OTP with a cooldown.
+     */
+    public function resendWebCode(string $email): bool
+    {
+        $email = strtolower(trim($email));
+
+        $key = "register:web:{$email}";
+        $resendKey = "register:web:resend:{$email}";
+
+        if (Redis::exists($resendKey)) {
+            return false;
+        }
+
+        $stored = Redis::get($key);
+
+        if (! $stored) {
+            return false;
+        }
+
+        $data = json_decode($stored, true);
+
+        if (! $data) {
+            return false;
+        }
+
+        $otp = $this->generateCode();
+
+        $data['otp_hash'] = Hash::make($otp);
+
+        Redis::setex(
+            $key,
+            $this->verificationExpiry * 60,
+            json_encode($data)
+        );
+
+        Redis::setex($resendKey, $this->resendCooldown, 1);
+
+        event(new \App\Events\UserRegistered($email, $otp));
+
+        return true;
+    }
+
 
     /** Store OTP in Redis */
     public function storeTempUser(array $data, ?UploadedFile $image = null): void

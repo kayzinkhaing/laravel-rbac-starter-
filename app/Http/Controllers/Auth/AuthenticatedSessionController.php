@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -29,6 +30,12 @@ class AuthenticatedSessionController extends Controller
         }
 
         $user = $request->validateCredentials();
+
+        if (! $user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => 'Please verify your email address before logging in.',
+            ]);
+        }
 
         if ($user->two_factor_enabled) {
             $request->session()->regenerate();

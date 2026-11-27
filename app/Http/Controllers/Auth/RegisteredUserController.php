@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
 
 class RegisteredUserController extends Controller
 {
@@ -34,15 +35,25 @@ class RegisteredUserController extends Controller
     {
         if (! ReCaptcha::verify($request->input('recaptcha_token'), 'register')) {
             return back()->withInput($request->only('name', 'email'))
-                ->withErrors(['recaptcha_token' => 'Security verification failed. Please try again.']);
+                ->withErrors([
+                    'recaptcha_token' => 'Security verification failed. Please try again.',
+                ]);
         }
 
-        $user = User::create($request->validated());
-        event(new Registered($user));
-        Auth::guard('web')->login($user);
-        $request->session()->regenerate();
+        $validated = $request->validated();
 
-        return redirect()->to(AdminDashboardAccess::dashboardUrlFor($user));
+        $email = strtolower(trim($validated['email']));
+
+        $this->registrationService->storeWebPendingRegistration([
+            'name' => $validated['name'],
+            'email' => $email,
+            'password' => $validated['password'],
+        ]);
+
+        $request->session()->put('pending_registration_email', $email);
+
+        return redirect()->route('register.otp')
+            ->with('status', 'We sent a verification code to your email.');
     }
 
     /**

@@ -114,4 +114,9 @@ class User extends Authenticatable implements MustVerifyEmail
             ? $this->getRelation('media')->first()
             : $this->media()->first();
     }
+
+    public function addresses()
+    {
+        return $this->morphMany(\App\Models\Address::class, 'addressable');
+    }
 }

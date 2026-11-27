@@ -55,6 +55,107 @@
         @endif
     </div>
 
+
+    {{-- Saved addresses --}}
+    <section class="surface-card mb-6 p-5 sm:p-6"
+             x-data="{ addressFormOpen: {{ old('_address_form') ? 'true' : 'false' }} }">
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-base font-semibold text-slate-900">My addresses</h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Your saved delivery and contact addresses.
+                </p>
+            </div>
+
+            <button type="button"
+                    class="btn-primary"
+                    @click="addressFormOpen = !addressFormOpen">
+                <span x-text="addressFormOpen ? 'Close form' : 'Add address'"></span>
+            </button>
+        </div>
+
+        <div class="mt-5 space-y-3">
+            @forelse ($addresses as $savedAddress)
+                <div class="rounded-lg border border-slate-200 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <p class="font-medium text-slate-900">
+                            {{ $savedAddress->building_name ?: 'Saved address' }}
+                        </p>
+
+                        @if ($savedAddress->is_default)
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                                Default
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        {{ collect([
+                            $savedAddress->address_line_1,
+                            $savedAddress->address_line_2,
+                            $savedAddress->unit_number,
+                            $savedAddress->ward?->name,
+                            $savedAddress->township?->name,
+                            $savedAddress->district?->name,
+                            $savedAddress->state?->name,
+                            $savedAddress->country?->name,
+                            $savedAddress->postal_code,
+                        ])->filter()->implode(', ') }}
+                    </p>
+
+                    @if ($savedAddress->landmark)
+                        <p class="mt-1 text-xs text-slate-500">
+                            Landmark: {{ $savedAddress->landmark }}
+                        </p>
+                    @endif
+                </div>
+            @empty
+                <div class="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center">
+                    <p class="text-sm font-medium text-slate-700">
+                        No saved addresses yet.
+                    </p>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Click Add address to create your first address.
+                    </p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Inline address creation form --}}
+        <div x-cloak x-show="addressFormOpen" x-transition class="mt-5">
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-slate-900">Create your address</h3>
+                <p class="mt-1 text-sm text-slate-500">
+                    Enter your address and select your Myanmar administrative locations.
+                </p>
+            </div>
+
+            <form method="POST" action="{{ route('addresses.store') }}">
+                @csrf
+                <input type="hidden" name="_address_form" value="1">
+
+                @include('addresses._form', [
+                    'address' => $address,
+                    'countries' => $countries,
+                    'locationOptions' => $locationOptions,
+                ])
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button"
+                            class="btn-secondary"
+                            @click="addressFormOpen = false">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn-primary">
+                        Save address
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
     <div class="space-y-5">
         <section class="surface-card p-5 sm:p-6">
             @include('profile.partials.update-profile-information-form', ['user' => $user])
