@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\ClientProfileInterface;
 use App\Contracts\CommonTableInterface;
+use App\Contracts\MasterDataCategoryInterface;
+use App\Contracts\MasterDataItemInterface;
 use App\Contracts\MediaInterface;
 use App\Contracts\messageInterface;
 use App\Contracts\OrganizationInterface;
@@ -12,6 +14,8 @@ use App\Contracts\roleInterface;
 use App\Contracts\UserInterface;
 use App\Repositories\ClientProfileRepository;
 use App\Repositories\CommonTableRepository;
+use App\Repositories\MasterDataCategoryRepository;
+use App\Repositories\MasterDataItemRepository;
 use App\Repositories\MediaRepository;
 use App\Repositories\messageRepository;
 use App\Repositories\OrganizationRepository;
@@ -32,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OrganizationInterface::class, OrganizationRepository::class);
         $this->app->bind(ClientProfileInterface::class, ClientProfileRepository::class);
         $this->app->bind(CommonTableInterface::class, CommonTableRepository::class);
+        $this->app->bind(MasterDataCategoryInterface::class, MasterDataCategoryRepository::class);
+        $this->app->bind(MasterDataItemInterface::class, MasterDataItemRepository::class);
         $this->app->bind(MediaInterface::class, MediaRepository::class);
         $this->app->bind(configFiles::class);
     }

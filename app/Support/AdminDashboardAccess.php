@@ -14,6 +14,7 @@ final class AdminDashboardAccess
         'manage users',
         'manage roles',
         'manage permissions',
+        'manage master data',
     ];
 
     public static function allows(User $user): bool

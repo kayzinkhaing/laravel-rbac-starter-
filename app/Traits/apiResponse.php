@@ -6,6 +6,9 @@ use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @mixin \App\Http\Controllers\Controller
+ */
 trait ApiResponse
 {
     /**
@@ -53,12 +56,13 @@ trait ApiResponse
     {
         return request()->is('api/*');
     }
-    protected function generateResponse(array $data = [])
+    protected function generateResponse(array $data = [], ?string $message = null)
     {
         if ($this->isApiRequest()) {
-            return $this->apiResponse($data);
+            return $this->apiResponse($data, 200, $message);
         }
 
-        return redirect()->route($this->getIndexRoute());
+        return redirect()
+            ->route($this->getIndexRoute(), $this->indexRouteParams());
     }
 }

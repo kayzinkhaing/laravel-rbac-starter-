@@ -60,5 +60,19 @@ return [
     App\Models\CommonTable::class => [
         'eager_load' => [],
     ],
+
+    App\Models\MasterDataCategory::class => [
+        'items' => ['label' => 'value'],
+        'eager_load' => [
+            'items:id,master_data_category_id,key,value,label,is_active,sort_order',
+        ],
+    ],
+
+    App\Models\MasterDataItem::class => [
+        'category' => ['label' => 'name'],
+        'eager_load' => [
+            'category:id,key,name',
+        ],
+    ],
     ],
 ];
