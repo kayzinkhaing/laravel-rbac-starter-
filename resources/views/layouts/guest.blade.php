@@ -22,7 +22,8 @@
         x-data="{ dark: document.documentElement.dataset.theme === 'dark' }"
         @click="dark = !dark; document.documentElement.dataset.theme = dark ? 'dark' : 'light'; document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')"
         :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'">
-        <span x-text="dark ? '☀' : '◐'" aria-hidden="true"></span>
+        <x-icon name="sun" class="h-5 w-5" x-show="dark" />
+        <x-icon name="moon" class="h-5 w-5" x-show="!dark" />
     </button>
     <main class="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.82fr)]">
         <section class="relative hidden overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">

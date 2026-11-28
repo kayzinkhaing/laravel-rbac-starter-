@@ -32,7 +32,8 @@
                     <button type="button" class="icon-button" x-data="{ dark: document.documentElement.dataset.theme === 'dark' }"
                         @click="dark = !dark; document.documentElement.dataset.theme = dark ? 'dark' : 'light'; document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')"
                         :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'">
-                        <span x-text="dark ? '☀' : '◐'" aria-hidden="true"></span>
+                        <x-icon name="sun" class="h-5 w-5" x-show="dark" />
+        <x-icon name="moon" class="h-5 w-5" x-show="!dark" />
                     </button>
                     <a href="{{ route('home') }}" @class([
                         'rounded-md px-2.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',

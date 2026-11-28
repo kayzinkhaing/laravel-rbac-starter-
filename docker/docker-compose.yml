@@ -1,7 +1,9 @@
+
 name: based_code
 
 services:
   app: &laravel-app
+    container_name: based_code-app
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -31,9 +33,15 @@ services:
         condition: service_healthy
     networks:
       - laravel
-    command: php-fpm
+    command: >
+      sh -lc "
+        php artisan migrate --force &&
+        php artisan db:seed --force &&
+        exec php-fpm
+      "
 
   nginx:
+    container_name: based_code-nginx
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -48,13 +56,16 @@ services:
 
   queue:
     <<: *laravel-app
+    container_name: based_code-queue
     command: php artisan queue:work --sleep=3 --tries=3
 
   scheduler:
     <<: *laravel-app
+    container_name: based_code-scheduler
     command: php artisan schedule:work
 
   mysql:
+    container_name: based_code-mysql
     image: mysql:8.0
     restart: unless-stopped
     ports:
