@@ -40,6 +40,14 @@ class LoginRequest extends FormRequest
      *
      * @throws ValidationException
      */
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'The Email field is required.',
+            'password.required' => 'The Password field is required.',
+        ];
+    }
+
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
