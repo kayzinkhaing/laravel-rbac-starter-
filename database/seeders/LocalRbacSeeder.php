@@ -5,13 +5,24 @@ namespace Database\Seeders;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use App\Support\AdminDashboardAccess;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class LocalRbacSeeder extends Seeder
 {
     public const PASSWORD = 'LocalOnly!2026';
+
+    /**
+     * Bootstrap permissions only. New module permissions are created from
+     * the Permissions CRUD and must not be added to dashboard access code.
+     */
+    private const STARTER_PERMISSIONS = [
+        'manage users',
+        'manage roles',
+        'manage permissions',
+        'manage master data',
+        'manage system permissions',
+    ];
 
     public function run(): void
     {
@@ -21,7 +32,7 @@ class LocalRbacSeeder extends Seeder
 
         $permissions = [];
 
-        foreach (AdminDashboardAccess::PERMISSIONS as $name) {
+        foreach (self::STARTER_PERMISSIONS as $name) {
             $permissions[$name] = Permission::query()->firstOrCreate([
                 'name' => $name,
                 'guard_name' => 'web',
@@ -29,7 +40,7 @@ class LocalRbacSeeder extends Seeder
         }
 
         $roleDefinitions = [
-            'super-admin' => AdminDashboardAccess::PERMISSIONS,
+            'super-admin' => self::STARTER_PERMISSIONS,
             'user-administrator' => ['manage users'],
             'role-administrator' => ['manage roles'],
             'permission-administrator' => ['manage permissions'],
@@ -54,6 +65,7 @@ class LocalRbacSeeder extends Seeder
             $roles[$name] = $role;
         }
 
+        // Keep the project's existing sample accounts and assignment rules.
         $accounts = [
             ['admin.rbac1331@gmail.com', 'Local', 'Administrator', 'super-admin'],
             ['users.rbac1331@gmail.com', 'User', 'Administrator', 'user-administrator'],

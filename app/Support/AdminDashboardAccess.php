@@ -10,21 +10,29 @@ use Illuminate\Support\Str;
 
 final class AdminDashboardAccess
 {
-    public const PERMISSIONS = [
-        'manage users',
-        'manage roles',
-        'manage permissions',
-        'manage master data',
-    ];
-
+    /**
+     * Dashboard entry is permission-driven.
+     *
+     * Any web-guard permission granted directly or through one of the
+     * user's roles can make the dashboard available. Individual dashboard
+     * sections and routes must still authorize their own permissions.
+     */
     public static function allows(User $user): bool
     {
-        return $user->hasAnyPermission(self::PERMISSIONS);
+        return $user->getAllPermissions()
+            ->contains(fn ($permission): bool => $permission->guard_name === 'web');
     }
 
+    /**
+     * A stable system capability, not a role-name check and not a list of
+     * every module permission currently registered in the database.
+     */
     public static function isSuperAdmin(User $user): bool
     {
-        return $user->hasAllPermissions(self::PERMISSIONS);
+        return $user->getAllPermissions()->contains(
+            fn ($permission): bool => $permission->guard_name === 'web'
+                && $permission->name === 'manage system permissions'
+        );
     }
 
     /**
@@ -82,8 +90,8 @@ final class AdminDashboardAccess
     }
 
     /**
-     * @param  Collection<int, Role>  $roles
-     * @param  Collection<int, Role>|null  $allRoles
+     * @param Collection<int, Role> $roles
+     * @param Collection<int, Role>|null $allRoles
      * @return array<int, string>
      */
     public static function slugsForRoles(Collection $roles, ?Collection $allRoles = null): array

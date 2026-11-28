@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Support\AdminDashboardAccess;
 
 class RolePolicy
 {
@@ -25,9 +26,12 @@ class RolePolicy
 
     public function update(User $user, Role $role): bool
     {
-        return $role->guard_name === 'web'
-            && $user->can('manage roles')
-            && array_diff($role->permissions->modelKeys(), $user->getAllPermissions()->modelKeys()) === [];
+        if ($role->guard_name !== 'web' || ! $user->can('manage roles')) {
+            return false;
+        }
+
+        return AdminDashboardAccess::isSuperAdmin($user)
+            || array_diff($role->permissions->modelKeys(), $user->getAllPermissions()->modelKeys()) === [];
     }
 
     public function delete(User $user, Role $role): bool

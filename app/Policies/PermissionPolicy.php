@@ -28,7 +28,7 @@ class PermissionPolicy
     {
         return $permission->guard_name === 'web'
             && $user->can('manage permissions')
-            && (! in_array(strtolower($permission->name), AdminDashboardAccess::PERMISSIONS, true)
+            && ($permission->name !== 'manage system permissions'
                 || AdminDashboardAccess::isSuperAdmin($user));
     }
 

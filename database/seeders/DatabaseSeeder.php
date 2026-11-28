@@ -11,6 +11,9 @@ class DatabaseSeeder extends Seeder
         if (app()->environment(['local', 'testing'])) {
             $this->call(LocalRbacSeeder::class);
             $this->call(MessageSeeder::class);
+            $this->call(MasterDataCategorySeeder::class);
+            $this->call(MasterDataItemSeeder::class);
+            $this->call(MyanmarAdministrativeDivisionSeeder::class);
         }
     }
 }

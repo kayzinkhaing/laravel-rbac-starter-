@@ -6,6 +6,7 @@ use App\Http\Requests\rolesRequest;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Services\roles;
+use App\Support\AdminDashboardAccess;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,11 +44,7 @@ class RoleController extends Controller
         $this->authorize('create', Role::class);
 
         return view('roles.create', [
-            'permissions' => Permission::query()
-                ->where('guard_name', 'web')
-                ->whereIn('id', request()->user()->getAllPermissions()->modelKeys())
-                ->orderBy('name')
-                ->get(),
+            'permissions' => $this->availablePermissions(request()->user()),
         ]);
     }
 
@@ -65,11 +62,7 @@ class RoleController extends Controller
 
         return view('roles.edit', [
             'role' => $role->load('permissions'),
-            'permissions' => Permission::query()
-                ->where('guard_name', 'web')
-                ->whereIn('id', request()->user()->getAllPermissions()->modelKeys())
-                ->orderBy('name')
-                ->get(),
+            'permissions' => $this->availablePermissions(request()->user()),
         ]);
     }
 
@@ -87,5 +80,18 @@ class RoleController extends Controller
         $this->roleService->deleteRole($role);
 
         return redirect()->route('role.roles.index')->with('success', 'Role deleted.');
+    }
+
+    private function availablePermissions($user)
+    {
+        $query = Permission::query()
+            ->where('guard_name', 'web')
+            ->orderBy('name');
+
+        if (! AdminDashboardAccess::isSuperAdmin($user)) {
+            $query->whereIn('id', $user->getAllPermissions()->modelKeys());
+        }
+
+        return $query->get();
     }
 }

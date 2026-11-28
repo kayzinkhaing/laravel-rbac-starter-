@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\AdminDashboardAccess;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -40,6 +41,10 @@ class rolesRequest extends FormRequest
                 ->filter()
                 ->map(fn ($id) => (int) $id)
                 ->all();
+
+            if (AdminDashboardAccess::isSuperAdmin($this->user())) {
+                return;
+            }
 
             if (array_diff($requestedPermissionIds, $this->user()->getAllPermissions()->modelKeys()) !== []) {
                 $validator->errors()->add('permissions', 'You cannot grant permissions you do not have.');

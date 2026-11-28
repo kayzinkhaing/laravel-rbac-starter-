@@ -32,12 +32,17 @@ class permissionsRequest extends FormRequest
     {
         $validator->after(function (Validator $validator): void {
             $permission = $this->route('permission');
-            $permissionName = is_object($permission) ? $permission->name : '';
-            $isReservedPermission = in_array(strtolower($permissionName), AdminDashboardAccess::PERMISSIONS, true);
-            $isReservedName = in_array(strtolower(trim((string) $this->input('name'))), AdminDashboardAccess::PERMISSIONS, true);
+            $oldNameIsSystemCapability = is_object($permission)
+                && $permission->name === 'manage system permissions';
+            $newNameIsSystemCapability = trim((string) $this->input('name'))
+                === 'manage system permissions';
 
-            if (($isReservedPermission || $isReservedName) && ! AdminDashboardAccess::isSuperAdmin($this->user())) {
-                $validator->errors()->add('name', 'Only a full administrator can create or change an administrative permission.');
+            if (($oldNameIsSystemCapability || $newNameIsSystemCapability)
+                && ! AdminDashboardAccess::isSuperAdmin($this->user())) {
+                $validator->errors()->add(
+                    'name',
+                    'Only a system administrator can create, rename, or modify the system permission.'
+                );
             }
         });
     }

@@ -38,6 +38,37 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+
+        /*
+         * Scope permission checks inside role-prefixed dashboards to the
+         * selected role plus direct user permissions. This prevents a
+         * permission inherited from another assigned role from leaking
+         * into the active role's dashboard.
+         */
+        Gate::before(function (User $user, string $ability): ?bool {
+            if (! request()->routeIs('role.*')) {
+                return null;
+            }
+
+            $activeRole = request()->attributes->get('activeRole');
+
+            if (! $activeRole instanceof Role) {
+                return null;
+            }
+
+            $isWebPermission = Permission::query()
+                ->where('guard_name', 'web')
+                ->where('name', $ability)
+                ->exists();
+
+            if (! $isWebPermission) {
+                return null;
+            }
+
+            return $activeRole->hasPermissionTo($ability, 'web')
+                || $user->hasDirectPermission($ability);
+        });
+
         Gate::define('access-admin-dashboard', [AdminDashboardAccess::class, 'allows']);
     }
 }

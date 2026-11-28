@@ -62,7 +62,6 @@ trait ApiResponse
             return $this->apiResponse($data, 200, $message);
         }
 
-        return redirect()
-            ->route($this->getIndexRoute(), $this->indexRouteParams());
+        return redirect()->route($this->getIndexRoute());
     }
 }
