@@ -1,46 +1,22 @@
-@php
-    $category = $data ?? null;
-@endphp
+@php($category = $data ?? null)
 
-<div class="space-y-5">
-    <div>
-        <label for="key">Key</label>
-        <input id="key" name="key" type="text" class="input-control w-full"
-               value="{{ old('key', $category?->key) }}"
-               placeholder="order-status" maxlength="100" required>
-        @error('key') <p class="text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
-        <label for="name">Name</label>
-        <input id="name" name="name" type="text" class="input-control w-full"
-               value="{{ old('name', $category?->name) }}"
-               placeholder="Order Status" maxlength="150" required>
-        @error('name') <p class="text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
-        <label for="description">Description</label>
-        <textarea id="description" name="description" class="input-control w-full"
-                  rows="4" maxlength="2000">{{ old('description', $category?->description) }}</textarea>
-        @error('description') <p class="text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
-        <label for="sort_order">Sort Order</label>
-        <input id="sort_order" name="sort_order" type="number" min="0"
-               class="input-control w-full"
-               value="{{ old('sort_order', $category?->sort_order ?? 0) }}">
-        @error('sort_order') <p class="text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div>
+<div class="grid gap-5 sm:grid-cols-2">
+    <x-crud.field name="key" label="Key" :value="$category?->key"
+        placeholder="order-status" maxlength="100" is-required />
+    <x-crud.field name="name" label="Name" :value="$category?->name"
+        placeholder="Order Status" maxlength="150" is-required />
+    <x-crud.field name="sort_order" label="Sort order" type="number"
+        :value="$category?->sort_order ?? 0" min="0" />
+    <div class="flex items-center pt-7">
         <input type="hidden" name="is_active" value="0">
-        <label class="inline-flex items-center gap-2">
+        <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
             <input type="checkbox" name="is_active" value="1"
-                   @checked((bool) old('is_active', $category?->is_active ?? true))>
-            Active
+                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                @checked((bool) old('is_active', $category?->is_active ?? true))>
+            Active category
         </label>
-        @error('is_active') <p class="text-red-600">{{ $message }}</p> @enderror
+        <x-input-error :messages="$errors->get('is_active')" />
     </div>
+    <x-crud.field name="description" label="Description" type="textarea"
+        :value="$category?->description" maxlength="2000" rows="4" class="sm:col-span-2" />
 </div>

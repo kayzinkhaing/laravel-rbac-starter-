@@ -15,9 +15,7 @@
             <p class="mt-1 text-sm text-slate-500">Manage reusable groups such as order status, payment status, and delivery type.</p>
         </div>
         @can('manage master data')
-            <a class="btn-primary" href="{{ route('master-data-categories.create') }}">
-                <x-icon name="plus" class="h-4 w-4" /> Add category
-            </a>
+            <a class="btn-primary" href="{{ route('master-data-categories.create') }}"><x-icon name="plus" class="h-4 w-4" /> Add category</a>
         @endcan
     </div>
 
@@ -45,7 +43,12 @@
                                 <a class="icon-button" href="{{ route('master-data-categories.show', data_get($category, 'id')) }}" aria-label="View category"><x-icon name="eye" class="h-4 w-4" /></a>
                                 @can('manage master data')
                                     <a class="icon-button" href="{{ route('master-data-categories.edit', data_get($category, 'id')) }}" aria-label="Edit"><x-icon name="pencil" class="h-4 w-4" /></a>
-                                    <form method="POST" action="{{ route('master-data-categories.destroy', data_get($category, 'id')) }}" onsubmit="return confirm('Delete this category? Categories with existing items are protected by the database relationship.')">@csrf @method('DELETE')<button type="submit" class="icon-button text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label="Delete category"><x-icon name="trash-2" class="h-4 w-4" /></button></form>
+                                    <x-crud.delete-button
+                                        :action="route('master-data-categories.destroy', data_get($category, 'id'))"
+                                        title="Delete category?"
+                                        :message="'Are you sure you want to delete ' . data_get($category, 'name', 'this category') . '? Categories that still have related items may be protected by the database relationship.'"
+                                        :aria-label="'Delete ' . data_get($category, 'name', 'category')"
+                                    />
                                 @endcan
                             </div></td>
                         </tr>
@@ -58,5 +61,4 @@
         @endif
     </div>
 </section>
-
 @endsection

@@ -25,10 +25,15 @@
             </div>
             <div class="flex items-center gap-3">
                 <a class="text-sm font-medium text-indigo-600" href="{{ route('addresses.edit', $address) }}">Edit</a>
-                <form method="POST" action="{{ route('addresses.destroy', $address) }}" onsubmit="return confirm('Delete this address?')">
-                    @csrf @method('DELETE')
-                    <button class="text-sm font-medium text-rose-600">Delete</button>
-                </form>
+                <x-crud.delete-button
+                    :action="route('addresses.destroy', $address)"
+                    title="Delete saved address?"
+                    message="Are you sure you want to permanently delete this saved address?"
+                    button-label="Delete"
+                    button-class="text-sm font-medium text-rose-600 hover:text-rose-700"
+                    aria-label="Delete saved address"
+                    icon=""
+                />
             </div>
         </section>
     @empty

@@ -1,6 +1,7 @@
 <div class="surface-card overflow-hidden">
     @if ($permissions->count())
-        @php($permissionGroups = $permissions->getCollection()->groupBy(fn ($permission) => \Illuminate\Support\Str::headline(\Illuminate\Support\Str::before($permission->name, '.'))))
+        @php($permissionGroups = $permissions->getCollection()->groupBy(fn ($permission) => \Illuminate\Support\Str::headline(\Illuminate\Support\Str::before($permission->name, '.')))
+        )
         @foreach ($permissionGroups as $module => $group)
             <div class="border-b border-slate-100 last:border-b-0">
                 <div class="flex items-center justify-between bg-slate-50/70 px-5 py-3 sm:px-6">
@@ -22,11 +23,12 @@
                                     <a href="{{ route('role.permissions.edit', ['permission' => $permission]) }}" class="icon-button" aria-label="Edit {{ $permission->name }}"><x-icon name="pencil" class="h-4 w-4" /></a>
                                 @endcan
                                 @can('delete', $permission)
-                                    <form action="{{ route('role.permissions.destroy', ['permission' => $permission]) }}" method="POST" onsubmit="return confirm('Delete this permission?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="icon-button text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label="Delete {{ $permission->name }}"><x-icon name="trash-2" class="h-4 w-4" /></button>
-                                    </form>
+                                    <x-crud.delete-button
+                                        :action="route('role.permissions.destroy', ['permission' => $permission])"
+                                        title="Delete permission?"
+                                        :message="'Are you sure you want to delete the ' . $permission->name . ' permission? Roles using it will lose this permission.'"
+                                        :aria-label="'Delete ' . $permission->name"
+                                    />
                                 @endcan
                             </div>
                         </div>

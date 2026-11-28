@@ -50,11 +50,12 @@
                                         <a href="{{ route('role.roles.edit', ['role' => $role]) }}" class="icon-button" aria-label="Edit {{ $role->name }}"><x-icon name="pencil" class="h-4 w-4" /></a>
                                     @endcan
                                     @can('delete', $role)
-                                        <form action="{{ route('role.roles.destroy', ['role' => $role]) }}" method="POST" onsubmit="return confirm('Delete this role? Users assigned to it will lose this role.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="icon-button text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label="Delete {{ $role->name }}"><x-icon name="trash-2" class="h-4 w-4" /></button>
-                                        </form>
+                                        <x-crud.delete-button
+                                            :action="route('role.roles.destroy', ['role' => $role])"
+                                            title="Delete role?"
+                                            :message="'Are you sure you want to delete the ' . \Illuminate\Support\Str::headline($role->name) . ' role? Users assigned to it will lose this role.'"
+                                            :aria-label="'Delete ' . $role->name"
+                                        />
                                     @endcan
                                 </div>
                             </td>

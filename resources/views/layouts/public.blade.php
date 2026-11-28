@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="{{ asset('rbac-logo.png') }}?v=1">
 </head>
 <body class="min-h-screen bg-white font-sans text-slate-900 antialiased">
     <div class="flex min-h-screen flex-col">

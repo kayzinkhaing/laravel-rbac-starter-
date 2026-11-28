@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="{{ asset('rbac-logo.png') }}?v=1">
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
     <div
@@ -71,7 +72,8 @@
                     <button type="button" class="icon-button" x-data="{ dark: document.documentElement.dataset.theme === 'dark' }"
                         @click="dark = !dark; document.documentElement.dataset.theme = dark ? 'dark' : 'light'; document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')"
                         :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'">
-                        <span x-text="dark ? '☀' : '◐'" aria-hidden="true"></span>
+                        <x-icon name="sun" class="h-5 w-5" x-show="dark" />
+                        <x-icon name="moon" class="h-5 w-5" x-show="!dark" />
                     </button>
 
                     <div class="relative">

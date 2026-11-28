@@ -10,10 +10,31 @@
         <p class="mt-2 text-sm text-slate-500">View and update your personal information and security settings.</p>
     </div>
 
+    @if (session('status') === 'profile-image-updated')
+        <div role="status" class="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <x-icon name="check-circle" class="mt-0.5 h-5 w-5 shrink-0" />
+            <p>Profile image updated successfully.</p>
+        </div>
+    @elseif (session('status') === 'profile-image-removed')
+        <div role="status" class="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <x-icon name="check-circle" class="mt-0.5 h-5 w-5 shrink-0" />
+            <p>Profile image removed successfully.</p>
+        </div>
+    @endif
+
     <div class="mb-6 surface-card p-5 sm:p-6">
         <div class="flex flex-wrap items-center gap-4" x-data="{ preview: null }">
-            @if ($user->profileImage())
-                <img src="{{ route('profile.image', ['user' => $user]) }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover ring-4 ring-slate-100">
+            @php
+                $profileMedia = $user->profileImage();
+                $imageVersion = $profileMedia ? sha1($profileMedia->url) : null;
+            @endphp
+
+            @if ($profileMedia)
+                <img
+                    src="{{ route('profile.image', ['user' => $user]) }}?v={{ $imageVersion }}"
+                    alt="{{ $user->name }}"
+                    class="h-16 w-16 rounded-full object-cover ring-4 ring-slate-100"
+                >
             @else
                 <span class="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-xl font-semibold text-indigo-700">
                     {{ strtoupper(substr($user->name ?: $user->email, 0, 1)) }}

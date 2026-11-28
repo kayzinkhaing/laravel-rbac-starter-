@@ -1,25 +1,27 @@
 @extends('layouts.app')
 
 @section('title', 'Edit Master Data Item')
+@section('description', 'Update this master data value.')
 
 @section('content')
-<div class="mx-auto max-w-3xl space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Edit Item</h1>
-        <a href="{{ route('master-data-items.index') }}" class="btn-secondary">Back</a>
-    </div>
-
-    <div class="surface-card p-6">
-        <form action="{{ route('master-data-items.update', $data->id) }}" method="POST">
+<div class="mx-auto max-w-3xl">
+    <x-crud.page-heading
+        title="Edit item"
+        description="Update the value and its category details."
+        :back-url="route('master-data-items.index')"
+        back-label="Back to items"
+    />
+    <x-crud.panel>
+        <form action="{{ route('master-data-items.update', $data->id) }}" method="POST" class="space-y-5">
             @csrf
             @method('PUT')
             @include('master-data-items._form', ['data' => $data])
-
-            <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('master-data-items.index') }}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary">Save Changes</button>
-            </div>
+            <x-crud.form-actions
+                :cancel-url="route('master-data-items.index')"
+                submit-label="Save changes"
+                loading-label="Saving changes"
+            />
         </form>
-    </div>
+    </x-crud.panel>
 </div>
 @endsection

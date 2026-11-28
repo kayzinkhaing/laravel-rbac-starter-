@@ -16,9 +16,7 @@
         <div class="overflow-x-auto">
             <table class="w-full min-w-[38rem] text-left">
                 <thead><tr class="table-heading border-b border-slate-100">
-                    <th class="px-5 py-3 font-medium sm:px-6">Key</th>
-                    <th class="px-5 py-3 font-medium">Value</th>
-                    <th class="px-5 py-3 text-right font-medium sm:px-6">Actions</th>
+                    <th class="px-5 py-3 font-medium sm:px-6">Key</th><th class="px-5 py-3 font-medium">Value</th><th class="px-5 py-3 text-right font-medium sm:px-6">Actions</th>
                 </tr></thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach($messages as $message)
@@ -28,10 +26,12 @@
                             <td class="px-5 py-4 text-right sm:px-6">
                                 <div class="inline-flex items-center gap-2">
                                     <a href="{{ route('messages.edit', [$message->id, 'key' => $message->name]) }}" class="icon-button" aria-label="Edit {{ $message->name }}"><x-icon name="pencil" class="h-4 w-4" /></a>
-                                    <form action="{{ route('messages.destroy', [$message->id, 'key' => $message->name]) }}" method="POST" onsubmit="return confirm('Delete this message?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="icon-button text-rose-600 hover:bg-rose-50" aria-label="Delete {{ $message->name }}"><x-icon name="trash-2" class="h-4 w-4" /></button>
-                                    </form>
+                                    <x-crud.delete-button
+                                        :action="route('messages.destroy', [$message->id, 'key' => $message->name])"
+                                        title="Delete message?"
+                                        :message="'Are you sure you want to delete the message record ' . $message->name . '?'"
+                                        :aria-label="'Delete ' . $message->name"
+                                    />
                                 </div>
                             </td>
                         </tr>

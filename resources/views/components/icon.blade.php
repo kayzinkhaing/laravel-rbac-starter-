@@ -77,6 +77,13 @@
         @case('x')
             <path d="m18 6-12 12M6 6l12 12"/>
             @break
+        @case('sun')
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/>
+            @break
+        @case('moon')
+            <path d="M20.985 12.486A9 9 0 1 1 11.514 3.015a7 7 0 0 0 9.471 9.471Z"/>
+            @break
         @default
             <circle cx="12" cy="12" r="9"/>
     @endswitch

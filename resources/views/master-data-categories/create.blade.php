@@ -1,24 +1,26 @@
 @extends('layouts.app')
 
 @section('title', 'Create Master Data Category')
+@section('description', 'Add a reusable category for application data.')
 
 @section('content')
-<div class="mx-auto max-w-3xl space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">Create Category</h1>
-        <a href="{{ route('master-data-categories.index') }}" class="btn-secondary">Back</a>
-    </div>
-
-    <div class="surface-card p-6">
-        <form action="{{ route('master-data-categories.store') }}" method="POST">
+<div class="mx-auto max-w-3xl">
+    <x-crud.page-heading
+        title="Create category"
+        description="Define a reusable group for related master data values."
+        :back-url="route('master-data-categories.index')"
+        back-label="Back to categories"
+    />
+    <x-crud.panel>
+        <form action="{{ route('master-data-categories.store') }}" method="POST" class="space-y-5">
             @csrf
             @include('master-data-categories._form')
-
-            <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('master-data-categories.index') }}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary">Create Category</button>
-            </div>
+            <x-crud.form-actions
+                :cancel-url="route('master-data-categories.index')"
+                submit-label="Create category"
+                loading-label="Creating category"
+            />
         </form>
-    </div>
+    </x-crud.panel>
 </div>
 @endsection
